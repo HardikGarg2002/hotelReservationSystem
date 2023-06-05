@@ -25,6 +25,7 @@ async function makeBooking (req, res){
 
     hotel.avaliableRooms-=1;
     await hotel.save();
+    sendConfirmationEmail(hotel);
 
     res.json({ message: 'Reservation made successfully' });
   } catch (err) {
@@ -61,7 +62,23 @@ async function cancelBooking(req,res){
 
 
 
-
+async function sendConfirmationEmail(hotel){
+    const transporter = nodemailer.createTransport({
+        // connect with the smtp
+        service: "gmail",
+        auth: {
+          user: process.env.AUTH_EMAIL,
+          pass: process.env.AUTH_PASS,
+        },
+      });
+    
+      await transporter.sendMail({
+        from: `<process.env.AUTH_EMAIL>`,
+        to: email, 
+        subject: "confirmation mail",
+        html: `<b> your hotel ${hotel} is confirmed successfully  </b>`, // html body
+      });
+}
 
 
 module.exports = {makeBooking,cancelBooking};
