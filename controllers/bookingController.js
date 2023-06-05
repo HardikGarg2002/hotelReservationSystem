@@ -12,13 +12,19 @@ async function makeBooking (req, res){
       return res.status(400).json({ error: 'Rooms are not available in this hotel' });
     }
 
+    
+    const durationInDays = Math.round(Math.abs((checkOutDate - checkInDate) / ( 24 * 60 * 60 * 1000)));
+
+    const cost = durationInDays * rate;
+
     const booking = new Booking({
       hotel: hotelId,
       user: req.loggedInUser.id,
       checkInDate: checkInDate,
       checkOutDate: checkOutDate,
       roomType: roomType,
-      paymentStatus: paid
+      paymentStatus: paid,
+      cost:cost
     });
 
     await booking.save();
