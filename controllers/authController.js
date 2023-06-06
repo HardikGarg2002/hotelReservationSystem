@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer")
 
 async function registerUser(req,res){
-    let { name,phoneNumber,email,password} = req.body;
+    let { name,phoneNumber,email,password,admin} = req.body;
     // console.log(name,phoneNumber,email,password);
 
     const salt = await bcrypt.genSalt(5);
@@ -18,7 +18,8 @@ async function registerUser(req,res){
         "phoneNumber": phoneNumber,
         "email": email,
        "password": password,
-        "emailOtp": otp
+        "emailOtp": otp,
+        "admin" : admin 
     })
     
     await user.save();
@@ -103,6 +104,7 @@ async function verifyToken(req,res,next) {
     const payload = await jwt.verify(token, process.env.SECRET_KEY);
     
     const user = await User.findOne({ email: payload.email});
+    if(!user.verification.emailVerified) throw new Error("email verification required");
     if (!user) {
         throw new Error("User not found");
     } 
@@ -125,7 +127,7 @@ async function logOut(req,res) {
     console.log("In Auth logout ");
     await User.findOneAndUpdate({ email : user.email }, { token: "" });
     res.json({message: "user logged out"})
-    
+
     }catch(error){
         res.status(400).json({errorMessage: "error while logging out"})
     }

@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         trim: true,
         required: true,
-        unique: true,
+        // unique: true,
         validate: {
             validator: function(name) {
                 return /^[a-zA-Z0-9 ]*$/.test(name);
@@ -45,15 +45,15 @@ const userSchema = new mongoose.Schema({
     password: {
         type : String,
         required: true,
-        validate: {
-            validator: function(password) {
-                var re =
-                    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-                return re.test(password);
-            },
-            message: (props) =>
-                `${props.value} need to be atleast 8 characters long contains at least a uppercase char, a lowercase char, a number and a special character(@$!%*?&)`,
-        },
+        // validate: {
+        //     validator: function(password) {
+        //         var re =
+        //             /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        //         return re.test(password);
+        //     },
+        //     message: (props) =>
+        //         `${props.value} need to be atleast 8 characters long contains at least a uppercase char, a lowercase char, a number and a special character(@$!%*?&)`,
+        // },
     },
     emailOtp:{
         type: Number
