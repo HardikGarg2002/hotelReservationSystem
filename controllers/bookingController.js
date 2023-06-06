@@ -1,11 +1,12 @@
 const Booking = require('../models/booking');
 const Hotel = require('../models/hotel');
+const nodemailer = require('nodemailer');
 
 // Create a hotel booking
 async function makeBooking (req, res){
   try {
 
-    const { hotelId, checkInDate, checkOutDate, roomType } = req.body;
+    const { hotelId, checkInDate, checkOutDate, roomType,paymentStatus } = req.body;
     const hotel = await Hotel.findById(hotelId);
     
     if(hotel.avaliableRooms<1) {
@@ -13,9 +14,9 @@ async function makeBooking (req, res){
     }
 
     
-    const durationInDays = Math.round(Math.abs((checkOutDate - checkInDate) / ( 24 * 60 * 60 * 1000)));
+    const durationInDays = Math.round(Math.abs((new Date(checkOutDate) - new Date(checkInDate)) / ( 24 * 60 * 60 * 1000)));
 
-    const cost = durationInDays * rate;
+    const cost = durationInDays * hotel.cost;
 
     const booking = new Booking({
       hotel: hotelId,
@@ -23,7 +24,7 @@ async function makeBooking (req, res){
       checkInDate: checkInDate,
       checkOutDate: checkOutDate,
       roomType: roomType,
-      paymentStatus: paid,
+      paymentStatus: paymentStatus,
       cost:cost
     });
 
@@ -31,7 +32,7 @@ async function makeBooking (req, res){
 
     hotel.avaliableRooms-=1;
     await hotel.save();
-    sendConfirmationEmail(hotel);
+    sendConfirmationEmail(hotel.name,req.loggedInUser.email);
 
     res.json({ message: 'Reservation made successfully' });
   } catch (err) {
@@ -68,7 +69,7 @@ async function cancelBooking(req,res){
 
 
 
-async function sendConfirmationEmail(hotel){
+async function sendConfirmationEmail(hotel,email){
     const transporter = nodemailer.createTransport({
         // connect with the smtp
         service: "gmail",

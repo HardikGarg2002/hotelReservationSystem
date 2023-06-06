@@ -72,7 +72,7 @@ async function getAllFeedbacks (req, res){
 
   async function searchHotels(req, res){
     try {
-      const { location,roomType } = req.query;
+      const { location,roomType } = req.body;
   
       // Perform the search based on the provided criteria
       const hotels = await Hotel.find({
