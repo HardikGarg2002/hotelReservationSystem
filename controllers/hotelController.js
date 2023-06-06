@@ -5,9 +5,9 @@ const Hotel = require('../models/hotel');
 async function getAllHotels(req, res){
     try{
     // const user = req.loggedInUser;
-    // if (!user.admin) {
-    //     return res.status(400).json({ error: 'Unauthorized Access' });
-    //   }
+    if (!user.admin) {
+        return res.status(400).json({ error: 'Unauthorized Access' });
+      }
     const hotels = await Hotel.find();
     res.json(hotels);  
     }catch(error){
@@ -81,7 +81,7 @@ async function getAllFeedbacks (req, res){
   };
 
 
-  async function searchHotels(req, res){
+  async function searchHotelByCategory(req, res){
     try {
       const { location,roomType } = req.body;
   
@@ -95,6 +95,18 @@ async function getAllFeedbacks (req, res){
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: 'Failed to perform hotel search' });
+    }
+}
+
+async function searchHotelByPrice(req,res){
+    try {
+        const { minCost, maxCost } = req.params;
+        const hotels = await Hotel.find({
+            cost : { $gte: minCost, $lte: maxCost },
+        });
+        res.status(200).json(hotels);
+    } catch (error) {
+        res.status(400).send({ message: error.message });
     }
 }
 
@@ -117,4 +129,4 @@ async function deleteHotel(req,res){
 
 
 
-module.exports = { getAllHotels,addHotel,editHotel,giveFeedback,getAllFeedbacks,searchHotels,deleteHotel}
+module.exports = { getAllHotels,addHotel,editHotel,giveFeedback,getAllFeedbacks,searchHotelByCategory,searchHotelByPrice,deleteHotel}

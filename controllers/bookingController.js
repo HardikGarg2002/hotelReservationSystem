@@ -28,7 +28,15 @@ async function makeBooking (req, res){
     if(today< new Date(checkInDate)){
         throw new Error("CheckIn date can not be in past")  
     }
+    const bookings = await Booking.find({
+      hotel: hotelId,
+      checkIndate: {$lte :checkOutDate},
+      checkOutDate : {$gte : checkInDate}
+    });
 
+    if(bookings.length+roomsRequired>hotel.avaliableRooms){
+      throw new Error({error:"not enough rooms avalianble"});
+    }
 
     const durationInDays = Math.round(Math.abs((new Date(checkOutDate) - new Date(checkInDate)) / ( 24 * 60 * 60 * 1000)));
 
@@ -69,7 +77,7 @@ async function cancelBooking(req,res){
     const hotel = await Hotel.findById(booking.hotel);
 
     // Update room availability
-    hotel.avaliableRooms+=1;
+    hotel.avaliableRooms+=booking.roomsRequired;
     hotel.save();
 
     await Booking.findByIdAndRemove(bookingId);
@@ -80,9 +88,6 @@ async function cancelBooking(req,res){
     res.status(500).json({ error: 'Failed to cancel booking' });
   }
 };
-
-
-
 
 
 async function sendConfirmationEmail(hotel,email){
