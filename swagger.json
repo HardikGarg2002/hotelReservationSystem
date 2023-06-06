@@ -1,0 +1,349 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Hotel Reservation System",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:3000/",
+            "description": "Hotel Reservation System"
+        }
+    ],
+    "tags": [
+        {
+            "name": "Hotel",
+            "description": "API for Hotels in the system"
+        },
+        {
+            "name": "Auth",
+            "description": "API for authorization in the system"
+        },
+        {
+            "name": "Booking",
+            "description": "API for Booking the hotel"
+        }
+    ],
+    "schemes":["http"],
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "paths": {
+        "/auth/register": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Sign Up new user in system",
+                "description": "Sign Up new user in system",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref":"#/definitions/RegisterUser"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "New user is created",
+                        "schema": {
+                            "$ref": "#/definitions/RegisterResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Error creating user",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Log in user in system",
+                "description": "Log in user in system",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                            "$ref":"#/definitions/LoginInput"
+                                }
+                        }
+                    }
+                },
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User logged in and token generated",
+                        "schema": {
+                            "$ref": "#/definitions/LoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Error logging in user",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/logout": {
+            "post": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Logout user from the system",
+                "description": "Logout user from the system",
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User logged in and token generated",
+                        "schema": {
+                            "$ref": "#/definitions/LogoutResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Error logging in user",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/verifyEmail": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Verify email through OTP",
+                "description": "Verify email through OTP",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                        "schema": {
+                            "$ref":"#/definitions/VerifyEmailInput"
+                            }
+                        }
+                    }
+                },
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Email verified Succesfully",
+                        "schema": {
+                            "$ref": "#/definitions/LogoutResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Error in email verification",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
+        
+        "/book": {
+            "post": {
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "tags": [
+                    "Book"
+                ],
+                "summary": "Add Hotel to book",
+                "description": "Add hotel to book",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                            "$ref":"#/definitions/BookInput"
+                            }
+                        }
+                    }
+                },
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Hotel added to Booking successfully",
+                        "schema": {
+                            "$ref": "#/definitions/LogoutResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Error in adding hotel to booking",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "apiKey",
+                "name": "Authorization",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "in": "header"
+            }
+        }
+    },
+    "definitions": {
+        "RegisterUser": {
+            "required": [
+                "name",
+                "email",
+                "phoneNumber",
+                "password",
+                "admin"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "admin": {
+                    "type" : "boolean"
+                }
+            }
+        },
+        "RegisterResponse": {
+            "required": [
+                "id",
+                "message"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "Error": {
+            "required": [
+                "message"
+            ],
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "LoginInput": {
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "LoginResponse": {
+            "required": [
+                "token"
+            ],
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "LogoutInput": {
+            "required": [
+                "token"
+            ],
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "LogoutResponse": {
+            "required": [
+                "message"
+            ],
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "VerifyEmailInput": {
+            "required": [
+                "email",
+                "otp"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "otp": {
+                    "type": "string"
+                }
+            }
+        },
+        "VerifyMobileInput": {
+            "required": [
+                "mobile",
+                "otp"
+            ],
+            "properties": {
+                "mobile": {
+                    "type": "string"
+                },
+                "otp": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

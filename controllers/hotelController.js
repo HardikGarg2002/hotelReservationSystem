@@ -24,7 +24,7 @@ async function addHotel (req, res){
     const hotel = req.body;
     const result = await Hotel.create(hotel);
     
-    res.json({message: "hotel added successfully" , hotelid : hotel._id});
+    res.json({message: "hotel added successfully" , hotelid : result._id});
     }catch(error){
         console.log("error in adding hotel")
         res.status(500).json({ error: 'Failed to add hotels' });
@@ -101,12 +101,14 @@ async function getAllFeedbacks (req, res){
 async function deleteHotel(req,res){
     try{
         const hotelId= req.params.id;
+        const user = req.loggedInUser;
+        if(!user.admin) throw new Error({message: "not authorised to delete the hotel"})
         const hotel = await Hotel.findById(hotelId);
         if (!hotel) {
             return res.json({ error: 'Hotel not found' });
         }
-        hotel.isActive = false;
-        await hotel.save();
+
+        await Hotel.findByIdAndUpdate(hotelId,{isActive : false});
         res.status(200).send("hotel deleted successfully");
     }catch(error){
         res.status(500).json({ error: 'Failed to delete hotel' });

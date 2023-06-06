@@ -9,4 +9,8 @@ const initDB =()=>{
     })
     .catch(err => console.log(err.reason));
 }
-module.exports = {initDB};
+const disconnectDB = () => {
+    mongoose.disconnect();
+    console.log("Database disconnected successfully");
+}
+module.exports = {initDB,disconnectDB};

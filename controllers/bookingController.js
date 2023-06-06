@@ -6,20 +6,33 @@ const nodemailer = require('nodemailer');
 async function makeBooking (req, res){
   try {
 
-    const { hotelId, checkInDate, checkOutDate, roomType,paymentStatus } = req.body;
+    const { hotelId, checkInDate, checkOutDate, roomType,paymentStatus,roomsRequired } = req.body;
     const hotel = await Hotel.findById(hotelId);
-    
     if (!hotel) {
-        return res.status(404).json({ error: 'Hotel not found' });
+        res.status(404).json({ error: 'Hotel not found' });
       }
-    if(hotel.avaliableRooms<1) {
+    if(!hotel.isActive){
+        res.status(404).json({error:'hotel no longer listed'})
+    }
+    if(hotel.avaliableRooms< roomsRequired) {
       return res.status(400).json({ error: 'Rooms are not available in this hotel' });
     }
 
+
+    // validation checks on dates
+    const today = new Date();
+    const day = today.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
     
+    if(today< new Date(checkInDate)){
+        throw new Error("CheckIn date can not be in past")  
+    }
+
+
     const durationInDays = Math.round(Math.abs((new Date(checkOutDate) - new Date(checkInDate)) / ( 24 * 60 * 60 * 1000)));
 
-    const cost = durationInDays * hotel.cost;
+    const cost = durationInDays * hotel.cost* roomsRequired;
 
     const booking = new Booking({
       hotel: hotelId,
@@ -33,7 +46,7 @@ async function makeBooking (req, res){
 
     await booking.save();
 
-    hotel.avaliableRooms-=1;
+    hotel.avaliableRooms-=roomsRequired;
     await hotel.save();
     sendConfirmationEmail(hotel.name,req.loggedInUser.email);
 
