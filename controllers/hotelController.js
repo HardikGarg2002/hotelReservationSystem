@@ -3,15 +3,20 @@ const Hotel = require('../models/hotel');
 
 
 async function getAllHotels(req, res){
+    try{
     // const user = req.loggedInUser;
     // if (!user.admin) {
     //     return res.status(400).json({ error: 'Unauthorized Access' });
     //   }
     const hotels = await Hotel.find();
     res.json(hotels);  
+    }catch(error){
+        res.status(500).json({ error: 'Failed to getall hotels' });
+    }
 };
 
 async function addHotel (req, res){
+    try{
     const user = req.loggedInUser;
     if (!user.admin) {
         return res.status(400).json({ error: 'Unauthorized Access' });
@@ -19,8 +24,11 @@ async function addHotel (req, res){
     const hotel = req.body;
     const result = await Hotel.create(hotel);
     
-    res.json({message: "hotel added successfully"});
-  
+    res.json({message: "hotel added successfully" , hotelid : hotel._id});
+    }catch(error){
+        console.log("error in adding hotel")
+        res.status(500).json({ error: 'Failed to add hotels' });
+    }
 };
 
 async function editHotel (req, res) {
@@ -60,6 +68,9 @@ async function getAllFeedbacks (req, res){
     try {
       const hotelId = req.params.id;
       const hotel = await Hotel.findById(hotelId);
+      if (!hotel) {
+        return res.json({ error: 'Hotel not found' });
+      }
       const feedbacks = hotel.feedbacks;
       res.json(feedbacks);
 
@@ -87,4 +98,21 @@ async function getAllFeedbacks (req, res){
     }
 }
 
-module.exports = { getAllHotels,addHotel,editHotel,giveFeedback,getAllFeedbacks,searchHotels}
+async function deleteHotel(req,res){
+    try{
+        const hotelId= req.params.id;
+        const hotel = await Hotel.findById(hotelId);
+        if (!hotel) {
+            return res.json({ error: 'Hotel not found' });
+        }
+        hotel.isActive = false;
+        await hotel.save();
+        res.status(200).send("hotel deleted successfully");
+    }catch(error){
+        res.status(500).json({ error: 'Failed to delete hotel' });
+    }
+}
+
+
+
+module.exports = { getAllHotels,addHotel,editHotel,giveFeedback,getAllFeedbacks,searchHotels,deleteHotel}

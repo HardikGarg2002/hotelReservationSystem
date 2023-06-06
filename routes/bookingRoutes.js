@@ -4,7 +4,7 @@ const bookingController = require('../controllers/bookingController');
 const authController = require('../controllers/authController');
 
 
-router.post('/booking/makebooking',authController.verifyToken, bookingController.makeBooking);
-router.post('/bookings/cancelbooking',authController.verifyToken, bookingController.cancelBooking);
+router.post('/',authController.verifyToken, bookingController.makeBooking);
+router.delete('/',authController.verifyToken, bookingController.cancelBooking);
 
 module.exports = router;

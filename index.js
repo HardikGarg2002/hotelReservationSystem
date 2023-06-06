@@ -11,8 +11,8 @@ app.use(express.json())
 conn.initDB();
 
 app.use("/auth",authRouter);
-app.use("/",hotelRouter);
-app.use("/",bookingRouter);
+app.use("/hotels",hotelRouter);
+app.use("/hotel/:id/booking",bookingRouter);
 app.get("/",(req,res)=>{
     res.send("home page dashboard");
 })

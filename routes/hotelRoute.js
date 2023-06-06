@@ -4,13 +4,13 @@ const router = express.Router();
 const hotelController = require('../controllers/hotelController');
 const authController = require('../controllers/authController');
 
-router.get('/hotels',hotelController.getAllHotels);
-router.post('/hotels',authController.verifyToken,hotelController.addHotel);
-router.put('/hotels/:id', authController.verifyToken,hotelController.editHotel);
-router.post('/hotels/:id/feedback', authController.verifyToken,hotelController.giveFeedback);
-router.get('/hotels/:id/feedbacks', hotelController.getAllFeedbacks);
-
-router.get('/hotels/searchByCategory', hotelController.searchHotels);
+router.get('/',hotelController.getAllHotels);
+router.post('/',authController.verifyToken,hotelController.addHotel);
+router.put('/:id', authController.verifyToken,hotelController.editHotel);
+router.post('/:id/feedback', authController.verifyToken,hotelController.giveFeedback);
+router.get('/:id/feedbacks', hotelController.getAllFeedbacks);
+router.delete('/:id',authController.verifyToken,hotelController.deleteHotel);
+router.get('/searchByCategory', hotelController.searchHotels);
 
 
 module.exports = router;

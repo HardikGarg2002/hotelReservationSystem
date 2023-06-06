@@ -9,6 +9,9 @@ async function makeBooking (req, res){
     const { hotelId, checkInDate, checkOutDate, roomType,paymentStatus } = req.body;
     const hotel = await Hotel.findById(hotelId);
     
+    if (!hotel) {
+        return res.status(404).json({ error: 'Hotel not found' });
+      }
     if(hotel.avaliableRooms<1) {
       return res.status(400).json({ error: 'Rooms are not available in this hotel' });
     }

@@ -1,9 +1,10 @@
 const jwt = require("jsonwebtoken");
-const User = require('../models/user');
+const User = require("../models/user");
 const bcrypt = require("bcrypt");
 const nodemailer = require("nodemailer")
 
 async function registerUser(req,res){
+    try{
     let { name,phoneNumber,email,password,admin} = req.body;
     // console.log(name,phoneNumber,email,password);
 
@@ -11,7 +12,7 @@ async function registerUser(req,res){
     password = await bcrypt.hash(password,salt);
 
     const otp = generateOtp();
-    // sendOtpToEmail(email,otp);
+    sendOtpToEmail(email,otp);
 
     const user = new User ({
         "name" : name,
@@ -24,9 +25,13 @@ async function registerUser(req,res){
     
     await user.save();
     res.send("user registered successfully");
+    }catch(error){
+        res.status(500).json("error in registering user");
+    }
 }
 
 async function generateToken(req,res){
+    try{
     const {email,password} = req.body;
     const user = await User.findOne({email: email});
     if(!user){
@@ -44,15 +49,19 @@ async function generateToken(req,res){
                 "isActive" : true
     }})
 
-    var token = jwt.sign(user.toObject(), process.env.SECRET_KEY, { expiresIn: '5h' });
+    // const token = jwt.sign(user.toObject(), process.env.SECRET_KEY, { expiresIn: '3h' });
+    const token = jwt.sign({"email": user.email}, process.env.SECRET_KEY, { expiresIn: '3h' });
 
     res.json({authentication : token});
+    }catch(error){
+        res.status(500).json({error: "Error in user login"});
+    }
  }
 
 
 async function sendOtpToEmail(email,otp){
     const transporter = nodemailer.createTransport({
-        // connect with the smtp
+
         service: "gmail",
         auth: {
           user: process.env.AUTH_EMAIL,
@@ -61,7 +70,7 @@ async function sendOtpToEmail(email,otp){
       });
     
       await transporter.sendMail({
-        from: `<process.env.AUTH_EMAIL>`,
+        from: `process.env.AUTH_EMAIL`,
         to: email, 
         subject: "OTP Verifictaion",
         html: `<b> OTP for verification: ${otp}  </b>`, // html body
@@ -77,9 +86,10 @@ function generateOtp(){
 
 
 async function verifyEmail(req,res){
+   try{
     const {email,otp} = req.body;
     const user = await User.findOne({email: email});
-    console.log(user);
+    // console.log(user);
     if(!(otp==user.emailOtp)){
         throw new Error("otp verification failed")
     }
@@ -90,6 +100,10 @@ async function verifyEmail(req,res){
     }})
 
     res.json({message: "otp verified succcessfuly"});
+    }catch(error){
+        console.error("email verification error:", error);  
+        res.status(401).json({message : "error in verifying email"});
+    }
 }
 
 
@@ -114,9 +128,8 @@ async function verifyToken(req,res,next) {
     return user;
     }
     catch (error) {
-        console.error("Token verification error:", error);
-        // Handle the error and send an appropriate response
-        res.status(401).json({ error: error.message });
+        console.error("Token verification error:", error);  
+        res.status(401).json("error in verifying token");
       }
 };
 

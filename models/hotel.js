@@ -37,6 +37,10 @@ const hotelSchema = new mongoose.Schema({
   cost :{
     type: Number,
     required : true
+  },
+  isActive : {
+    type: Boolean,
+    default: true
   }
 
 });
