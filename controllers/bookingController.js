@@ -36,9 +36,9 @@ async function makeBooking (req, res){
       checkIndate: {$lte :checkOutDate},
       checkOutDate : {$gte : checkInDate}
     });
-
+    const Rooms = hotel.avaliableRooms - bookings.length;
     if(bookings.length+roomsRequired>hotel.avaliableRooms){
-      throw new Error({error:"not enough rooms avalianble"});
+      throw new Error({error:`Not enough rooms avalianble. you may book only ${Rooms}`});
     }
 
     const durationInDays = Math.round(Math.abs((new Date(checkOutDate) - new Date(checkInDate)) / ( 24 * 60 * 60 * 1000)));

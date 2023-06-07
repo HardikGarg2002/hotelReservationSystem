@@ -34,6 +34,9 @@ async function generateToken(req,res){
     try{
     const {email,password} = req.body;
     const user = await User.findOne({email: email});
+    if(!user.verification.emailVerified) {
+        res.status(403).json({message:"you must verifiy first before login",error:"Request forbidden"})
+    }
     if(!user){
         throw new Error( "User not found");
     }
