@@ -125,6 +125,9 @@ async function verifyToken(req,res,next) {
     if (!user) {
         throw new Error("User not found");
     } 
+    if(!user.isActive){
+        throw new Error("User not logged in, logIn first");
+    }
     req.loggedInUser = user;
     console.log("user token verified")
     next();
@@ -141,7 +144,9 @@ async function logOut(req,res) {
 
     const user = req.loggedInUser;
     console.log("In Auth logout ");
-    await User.findOneAndUpdate({ email : user.email }, { token: "" });
+    user.isActive = false;
+    // await User.findOneAndUpdate({ email : user.email }, { token: "" });
+    user.save();
     res.json({message: "user logged out"})
 
     }catch(error){

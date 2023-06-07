@@ -28,7 +28,7 @@ async function makeBooking (req, res){
     // const month = date.getMonth() + 1;
     // const year = date.getFullYear();
     
-    if(today< new Date(checkInDate)){
+    if(today> new Date(checkInDate) && today> new Date(checkOutDate)){
         throw new Error("CheckIn date can not be in past")  
     }
     const bookings = await Booking.find({

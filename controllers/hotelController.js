@@ -51,7 +51,7 @@ async function giveFeedback (req, res){
   try {
     const { feedback } = req.body;
     const hotel = await Hotel.findById(req.params.id);
-
+    const user = req.loggedInUser;
     if (!hotel) {
       return res.json({ error: 'Hotel not found' });
     }
