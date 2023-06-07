@@ -9,12 +9,15 @@ async function makeBooking (req, res){
     const { hotelId, checkInDate, checkOutDate, roomType,paymentStatus,roomsRequired } = req.body;
     const hotel = await Hotel.findById(hotelId);
     if (!hotel) {
-        res.status(404).json({ error: 'Hotel not found' });
-      }
+      console.error('hotel not found');
+      res.status(404).json({ error: 'Hotel not found' });
+    }
     if(!hotel.isActive){
+        console.error("hotel not listed")
         res.status(404).json({error:'hotel no longer listed'})
     }
     if(hotel.avaliableRooms< roomsRequired) {
+      console.error('Rooms are not available in this hotel');
       return res.status(400).json({ error: 'Rooms are not available in this hotel' });
     }
 
@@ -108,5 +111,16 @@ async function sendConfirmationEmail(hotel,email){
       });
 }
 
+async function getUserBookings(req,res){
+  try{
+    const user = req.loggedInUser;
+    const bookings = Booking.find({ user: user._id });
 
-module.exports = {makeBooking,cancelBooking};
+    res.json({ bookings });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to retrieve user bookings' });
+  }
+}
+
+module.exports = {makeBooking,cancelBooking,getUserBookings};

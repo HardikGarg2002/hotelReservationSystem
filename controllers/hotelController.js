@@ -5,9 +5,9 @@ const Hotel = require('../models/hotel');
 async function getAllHotels(req, res){
     try{
     // const user = req.loggedInUser;
-    if (!user.admin) {
-        return res.status(400).json({ error: 'Unauthorized Access' });
-      }
+    // if (!user.admin) {
+    //     return res.status(400).json({ error: 'Unauthorized Access' });
+    //   }
     const hotels = await Hotel.find();
     res.json(hotels);  
     }catch(error){
@@ -19,7 +19,7 @@ async function addHotel (req, res){
     try{
     const user = req.loggedInUser;
     if (!user.admin) {
-        return res.status(400).json({ error: 'Unauthorized Access' });
+        return res.status(401).json({ error: 'Unauthorized Access' });
       }
     const hotel = req.body;
     const result = await Hotel.create(hotel);
@@ -32,9 +32,9 @@ async function addHotel (req, res){
 };
 
 async function editHotel (req, res) {
-
+    const user = req.loggedInUser;
     if (!user.admin) {
-        return res.status(400).json({ error: 'Unauthorized Access' });
+        return res.status(401).json({ error: 'Unauthorized Access' });
     }
     const hotel = req.body;
     const id = req.params.id;
@@ -57,10 +57,10 @@ async function giveFeedback (req, res){
     }
     hotel.feedbacks.push(feedback);
     await hotel.save();
-
+    res.status(200).json({message: "feedback accepted"})
   } catch (err) {
     console.error(err);
-    res.json({ error: 'Server Error' });
+    res.status(500).json({ error: 'Server Error' });
   }
 };
 
@@ -72,6 +72,9 @@ async function getAllFeedbacks (req, res){
         return res.json({ error: 'Hotel not found' });
       }
       const feedbacks = hotel.feedbacks;
+      if(feedbacks.length===0) {
+        res.status(200).json({message: "Hotels do not have feedbacks"})
+      }
       res.json(feedbacks);
 
     } catch (err) {
@@ -90,7 +93,9 @@ async function getAllFeedbacks (req, res){
         location: location,
         roomType: roomType
       });
-      
+      if(hotels.length===0){
+        res.status(200).json({message: "Modify preference, no hotel with this category"})
+      }
       res.json(hotels);
     } catch (err) {
       console.error(err);
@@ -100,10 +105,13 @@ async function getAllFeedbacks (req, res){
 
 async function searchHotelByPrice(req,res){
     try {
-        const { minCost, maxCost } = req.params;
+        const { minCost, maxCost } = req.body;
         const hotels = await Hotel.find({
             cost : { $gte: minCost, $lte: maxCost },
         });
+        if(hotels.length===0){
+          return res.status(200).send({message: "no hotel within this cost range"})
+        }
         res.status(200).json(hotels);
     } catch (error) {
         res.status(400).send({ message: error.message });
@@ -117,10 +125,13 @@ async function deleteHotel(req,res){
         if(!user.admin) throw new Error({message: "not authorised to delete the hotel"})
         const hotel = await Hotel.findById(hotelId);
         if (!hotel) {
-            return res.json({ error: 'Hotel not found' });
+            return res.status(200).json({ error: 'Hotel not found' });
         }
 
-        await Hotel.findByIdAndUpdate(hotelId,{isActive : false});
+        const result =await Hotel.findByIdAndUpdate(hotelId,{isActive : false});
+        if(!result){
+          res.status(200).json({message: "hotel already deleted"})
+        }
         res.status(200).send("hotel deleted successfully");
     }catch(error){
         res.status(500).json({ error: 'Failed to delete hotel' });

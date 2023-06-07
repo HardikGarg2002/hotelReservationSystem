@@ -67,6 +67,10 @@ const userSchema = new mongoose.Schema({
         default: Date.now(),
         immutable: true,
     },
+    // bookings: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: 'Booking',
+    // }
     
 })
 
