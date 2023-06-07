@@ -24,9 +24,9 @@ async function makeBooking (req, res){
 
     // validation checks on dates
     const today = new Date();
-    const day = today.getDate();
-    const month = date.getMonth() + 1;
-    const year = date.getFullYear();
+    // const day = today.getDate();
+    // const month = date.getMonth() + 1;
+    // const year = date.getFullYear();
     
     if(today< new Date(checkInDate)){
         throw new Error("CheckIn date can not be in past")  
@@ -47,7 +47,7 @@ async function makeBooking (req, res){
 
     const booking = new Booking({
       hotel: hotelId,
-      user: req.loggedInUser.id,
+      user: req.loggedInUser._id,
       checkInDate: checkInDate,
       checkOutDate: checkOutDate,
       roomType: roomType,
@@ -55,13 +55,13 @@ async function makeBooking (req, res){
       cost:cost
     });
 
-    await booking.save();
+    const result= await booking.save();
 
     hotel.avaliableRooms-=roomsRequired;
     await hotel.save();
     sendConfirmationEmail(hotel.name,req.loggedInUser.email);
 
-    res.json({ message: 'Reservation made successfully' });
+    res.json({ message: 'Reservation made successfully',bookingId:result._id});
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to make a reservation' });
@@ -71,7 +71,7 @@ async function makeBooking (req, res){
 async function cancelBooking(req,res){
 
   try {
-    const bookingId = req.params.id;
+    const {bookingId} = req.body;
     const booking = await Booking.findById(bookingId);
     if (!booking) {
       return res.json({ error: 'Booking not found' });
@@ -114,9 +114,11 @@ async function sendConfirmationEmail(hotel,email){
 async function getUserBookings(req,res){
   try{
     const user = req.loggedInUser;
-    const bookings = Booking.find({ user: user._id });
-
-    res.json({ bookings });
+    const bookings = await Booking.find({ user: user._id });
+    if(!bookings){
+      res.status(200).send("no bookings by the user");
+    }
+    res.send( bookings);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to retrieve user bookings' });
