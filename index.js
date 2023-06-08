@@ -9,6 +9,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(express.json())
 app.use(cors());
+const swaggerUi = require('swagger-ui-express');
+swaggerDocument = require('./swagger.json');
 
 const authRouter = require("./routes/authRoute");
 const hotelRouter = require("./routes/hotelRoute");
@@ -43,7 +45,7 @@ process.on("exit", () => {
     console.log("Server closed");
 });
 
-// app.use("/api-docs",swaggerUi.serve,swaggerUi.setup(swaggerDocument));
+app.use("/api-docs",swaggerUi.serve,swaggerUi.setup(swaggerDocument));
 
 
 app.listen(PORT,()=>{
