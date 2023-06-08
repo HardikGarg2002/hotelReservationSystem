@@ -145,7 +145,6 @@ async function logOut(req,res) {
     const user = req.loggedInUser;
     console.log("In Auth logout ");
     user.isActive = false;
-    // await User.findOneAndUpdate({ email : user.email }, { token: "" });
     user.save();
     res.json({message: "user logged out"})
 
