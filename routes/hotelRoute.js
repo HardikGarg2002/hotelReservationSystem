@@ -5,7 +5,7 @@ const hotelController = require('../controllers/hotelController');
 const authController = require('../controllers/authController');
 
 router.get('/',hotelController.getAllHotels);
-router.get('/admin',authController.verifyToken,hotelController.getAllHotelsForAdmin);
+// router.get('/admin',authController.verifyToken,hotelController.getAllHotelsForAdmin);
 router.post('/',authController.verifyToken,hotelController.addHotel);
 router.put('/:id', authController.verifyToken,hotelController.editHotel);
 router.post('/:id/feedback', authController.verifyToken,hotelController.giveFeedback);

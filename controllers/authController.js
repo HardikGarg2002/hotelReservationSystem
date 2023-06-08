@@ -110,7 +110,7 @@ async function verifyEmail(req,res){
 }
 
 
-async function verifyToken(req,res,next) {
+async function verifyToken(req,res) {
     try{
         if(!req.headers.authorization){
             res.status(401).send("Auth token not found");
@@ -133,7 +133,7 @@ async function verifyToken(req,res,next) {
     }
     req.loggedInUser = user;
     console.log("user token verified")
-    next();
+    
     return user;
     }
     catch (error) {
