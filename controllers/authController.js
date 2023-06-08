@@ -112,6 +112,9 @@ async function verifyEmail(req,res){
 
 async function verifyToken(req,res,next) {
     try{
+        if(!req.headers.authorization){
+            res.status(401).send("Auth token not found");
+        }
     const authHeader = req.headers["authorization"];
     const token = authHeader.split(" ")[1];
     if (!token)
