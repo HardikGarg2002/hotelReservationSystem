@@ -9,6 +9,11 @@ async function getAllHotels(req, res){
     //     return res.status(400).json({ error: 'Unauthorized Access' });
     //   }
     const hotels = await Hotel.find();
+    const activeHotels = [];
+    for(let i=0; i< hotels.length;i++){
+      if(hotels[i].isActive)
+      activeHotels.push(hotels[i]);
+    }
     res.json(hotels);  
     }catch(error){
         res.status(500).json({ error: 'Failed to getall hotels' });
