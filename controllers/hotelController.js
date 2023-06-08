@@ -1,6 +1,6 @@
 const Hotel = require('../models/hotel');
 
-
+const authController = require('./authController');
 
 async function getAllHotels(req, res){
     try{
@@ -8,17 +8,48 @@ async function getAllHotels(req, res){
     // if (!user.admin) {
     //     return res.status(400).json({ error: 'Unauthorized Access' });
     //   }
+    console.log('in get All hotels');
     const hotels = await Hotel.find();
+    
+    if(req.headers.authorization){
+      await authController.verifyToken(req,res);
+      const user = req.loggedInUser;
+
+      if(user.admin==true){
+        console.log(hotels.length)
+        return res.status(200).json(hotels);
+      }
+    }
+
     const activeHotels = [];
     for(let i=0; i< hotels.length;i++){
-      if(hotels[i].isActive)
-      activeHotels.push(hotels[i]);
+      
+      if(hotels[i].isActive){
+        activeHotels.push(hotels[i]);
+      }
     }
-    res.json(hotels);  
+    console.log("active hotels are" ,activeHotels.length);
+    return res.json(activeHotels);  
     }catch(error){
         res.status(500).json({ error: 'Failed to getall hotels' });
     }
 };
+
+
+async function getAllHotelsForAdmin(req,res){
+  try{
+    const user = req.loggedInUser;
+    if(!user.admin){
+      throw new Error("Only admin can make this request ")
+    }
+    const hotels = await Hotel.find();
+    res.json(hotels);  
+
+    }catch(error){
+        res.status(500).json({ error: 'Failed to get all hotels' });
+    }
+
+}
 
 async function addHotel (req, res){
     try{
@@ -145,4 +176,4 @@ async function deleteHotel(req,res){
 
 
 
-module.exports = { getAllHotels,addHotel,editHotel,giveFeedback,getAllFeedbacks,searchHotelByCategory,searchHotelByPrice,deleteHotel}
+module.exports = { getAllHotels,getAllHotelsForAdmin,addHotel,editHotel,giveFeedback,getAllFeedbacks,searchHotelByCategory,searchHotelByPrice,deleteHotel}
