@@ -65,7 +65,7 @@ async function generateToken(req,res){
     // const token = jwt.sign(user.toObject(), process.env.SECRET_KEY, { expiresIn: '3h' });
     const token = jwt.sign({"email": user.email}, process.env.SECRET_KEY, { expiresIn: '3h' });
 
-    res.json({authentication : token});
+    return res.status(200).json({authentication : token});
     }catch(error){
         res.status(500).json({error: "Error in user login"});
     }

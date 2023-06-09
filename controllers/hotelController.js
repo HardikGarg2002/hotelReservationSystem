@@ -1,5 +1,5 @@
 const Hotel = require('../models/hotel');
-
+const Booking = require('../models/booking')
 const authController = require('./authController');
 
 async function getAllHotels(req, res){
@@ -72,10 +72,10 @@ async function editHotel (req, res) {
     if (!user.admin) {
         return res.status(401).json({ error: 'Unauthorized Access' });
     }
-    const hotel = req.body;
+    const updates = req.body;
     const id = req.params.id;
     try {
-        const updatedHotel = await Hotel.findByIdAndUpdate(id,hotel);
+        const updatedHotel = await Hotel.findByIdAndUpdate(id,updates, {new: true});
         res.json(updatedHotel);
     } catch (err) {
         console.error(err);
@@ -88,15 +88,19 @@ async function giveFeedback (req, res){
     const { feedback } = req.body;
     const hotel = await Hotel.findById(req.params.id);
     const user = req.loggedInUser;
+    const bookings = Booking.find({user: user._id});
+    if(!bookings){
+      return res.status(402).json({message: "user need to book a hotel to give feedback"})
+    }
     if (!hotel) {
-      return res.json({ error: 'Hotel not found' });
+      return res.status(404).json({ error: 'Hotel not found' });
     }
     hotel.feedbacks.push(feedback);
     await hotel.save();
-    res.status(200).json({message: "feedback accepted"})
+    return res.status(200).json({message: "feedback accepted"})
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Server Error' });
+    return res.status(500).json({ error: 'Server Error' });
   }
 };
 

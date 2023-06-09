@@ -27,7 +27,8 @@ const bookingSchema = new mongoose.Schema({
     default: 0
   },
   paymentStatus:{
-    type: String
+    type: String,
+    default:"unpaid"
   }
 
 });

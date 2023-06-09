@@ -22,7 +22,7 @@ conn.initDB();
 
 app.use("/auth",authRouter);
 app.use("/hotels",hotelRouter);
-app.use("/hotel/:id/booking",bookingRouter);
+app.use("/hotel/:hotelId/booking",bookingRouter);
 app.use('/',paymentRouter)
 app.get("/",(req,res)=>{
     res.send("home page dashboard");
