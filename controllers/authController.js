@@ -5,15 +5,24 @@ const nodemailer = require("nodemailer")
 
 async function registerUser(req,res){
     try{
-    let { name,phoneNumber,email,password,admin} = req.body;
+    let { name,email,password} = req.body;
     // console.log(name,phoneNumber,email,password);
-
+    const admin = req.body.admin || false ;
+    const phoneNumber = req.body.phoneNumber || "0000000000";
+    if(!name || !email || !password){
+        throw new Error("All three fields email, password and name is required")
+    }
     const salt = await bcrypt.genSalt(5);
     password = await bcrypt.hash(password,salt);
 
     const otp = generateOtp();
-    sendOtpToEmail(email,otp);
-
+    
+    const dbUser = await User.findOne({email: email});
+    // console.log(dbUser);
+    if(dbUser){
+        console.log("user already exists")
+        throw new Error("User already exists")
+    }
     const user = new User ({
         "name" : name,
         "phoneNumber": phoneNumber,
@@ -24,9 +33,10 @@ async function registerUser(req,res){
     })
     
     await user.save();
+    sendOtpToEmail(email,otp);
     res.send("user registered successfully");
     }catch(error){
-        res.status(500).json("error in registering user");
+        res.status(500).json({error: error.message});
     }
 }
 
