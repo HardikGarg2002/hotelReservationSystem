@@ -5,16 +5,17 @@ const nodemailer = require('nodemailer');
 // Create a hotel booking
 async function makeBooking (req, res){
   try {
-
-    const { hotelId, checkInDate, checkOutDate, roomType,paymentStatus,roomsRequired } = req.body;
+    const hotelId = req.params.hotelId;
+    const {checkInDate, checkOutDate, roomType,roomsRequired } = req.body;
     const hotel = await Hotel.findById(hotelId);
+    const paymentStatus = req.body.paymentStatus || "unpaid";
     if (!hotel) {
       console.error('hotel not found');
-      res.status(404).json({ error: 'Hotel not found' });
+      return res.status(404).json({ error: 'Hotel not found' });
     }
     if(!hotel.isActive){
         console.error("hotel not listed")
-        res.status(404).json({error:'hotel no longer listed'})
+        return res.status(404).json({error:'hotel no longer listed'})
     }
     if(hotel.avaliableRooms< roomsRequired) {
       console.error('Rooms are not available in this hotel');
@@ -61,17 +62,18 @@ async function makeBooking (req, res){
     await hotel.save();
     sendConfirmationEmail(hotel.name,req.loggedInUser.email);
 
-    res.json({ message: 'Reservation made successfully',bookingId:result._id});
+    return res.json({ message: 'Reservation made successfully',bookingId:result._id});
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to make a reservation' });
+    return res.status(500).json({ error: 'Failed to make a reservation' });
   }
 };
 
 async function cancelBooking(req,res){
 
   try {
-    const {bookingId} = req.body;
+    const bookingId = req.params.bookingId;
+
     const booking = await Booking.findById(bookingId);
     if (!booking) {
       return res.json({ error: 'Booking not found' });
@@ -110,6 +112,25 @@ async function sendConfirmationEmail(hotel,email){
         html: `<b> your hotel ${hotel} is confirmed successfully  </b>`, // html body
       });
 }
+async function getAllBookingsOfHotel(req,res){
+  try{
+    // Todo 
+      const user = req.loggedInUser;
+      if(!user.admin){
+        throw new Error("Unauthorized access");
+      }
+      const hotelId = req.params.hotelId;
+      const bookings = await Booking.find({hotel : hotelId})
+      if(!bookings){
+        return res.status(200).json({message: "no bookings found"});
+      }
+      return res.status(200).json(bookings);
+    } catch(e){
+        console.log(e);
+        res.status(500).json({error : e});
+      }
+ }
+
 
 async function getUserBookings(req,res){
   try{
@@ -125,4 +146,4 @@ async function getUserBookings(req,res){
   }
 }
 
-module.exports = {makeBooking,cancelBooking,getUserBookings};
+module.exports = {makeBooking,cancelBooking,getUserBookings,getAllBookingsOfHotel};
