@@ -298,26 +298,15 @@
           "tags": [
             "Hotel"
           ],
-          "parameters": [
-            {
-              "name": "location",
-              "in": "query",
-              "description": "Location to search hotels in",
-              "required": true,
-              "schema": {
-                "type": "string"
-              }
-            },
-            {
-              "name": "roomType",
-              "in": "query",
-              "description": "Type of room to search",
-              "required": false,
-              "schema": {
-                "type": "string"
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchCategory"
+                }
               }
             }
-          ],
+          },
           "responses": {
             "200": {
               "description": "Successfully retrieved hotels"
@@ -358,7 +347,9 @@
               "description": "Hotel booking created successfully"
             }
           }
-        },
+        }
+      },
+      "/hotels/{hotelId}/booking/{bookingId}":{
         "delete": {
           "summary": "Cancel a hotel booking",
           "tags": ["Booking"],
@@ -370,6 +361,14 @@
           "parameters": [
             {
               "name": "hotelId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "name": "bookingId",
               "in": "path",
               "required": true,
               "schema": {
@@ -396,6 +395,32 @@
       "/hotel/{hotelId}/booking": {
         "get": {
           "summary": "Get all bookings for a hotel",
+          "tags": ["Booking"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "hotelId",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successfully retrieved hotel bookings"
+            }
+          }
+        }
+      },
+      "/hotel/{hotelId}/booking/user": {
+        "get": {
+          "summary": "Get all bookings of a user in a hotel",
           "tags": ["Booking"],
           "security": [
             {
@@ -470,7 +495,7 @@
               "type": "string",
               "format": "email"
             },
-            "verificationCode": {
+            "otp": {
               "type": "string"
             }
           }
@@ -497,11 +522,14 @@
             "location": {
               "type": "string"
             },
-            "category": {
+            "roomType": {
               "type": "string"
             },
             "description": {
               "type": "string"
+            },
+            "cost":{
+              "type":"number"
             }
           }
         },
@@ -525,17 +553,11 @@
         "HotelFeedback": {
           "type": "object",
           "properties": {
-            "rating": {
-              "type": "number",
-              "minimum": 1,
-              "maximum": 5
-            },
-            "comment": {
+            "feedback": {
               "type": "string"
             }
           }
-        }
-      },
+        },
       "HotelBooking": {
         "type": "object",
         "properties": {
@@ -547,11 +569,26 @@
             "type": "string",
             "format": "date"
           },
-          "guests": {
-            "type": "integer"
+          "roomType": {
+            "type": "string"
+          },
+          "roomsRequired":{
+            "type" : "number"
           }
         },
         "required": ["checkInDate", "checkOutDate", "guests"]
+      },
+      "SearchCategory":{
+        "type": "object",
+        "properties": {
+          "location": {
+            "type": "string"
+          },
+          "roomType": {
+            "type": "string"
+          }
+        },
+        "required": ["location", "roomType"]
       },
       "BookingCancellation": {
         "type": "object",
@@ -561,7 +598,7 @@
           }
         },
         "required": ["bookingId"]
-      }
+      }}
     },
     "securitySchemes": {
       "bearerAuth": {
